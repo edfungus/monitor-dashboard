@@ -1,0 +1,214 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../bower_components/px-icon-set/px-icon-set.html"/>
+<link rel="import" href="../status-group/status-group.html">
+<link rel="import" href="../container-header/container-header.html">
+<link rel="import" href="../notification-border/notification-border.html">
+<link rel="import" href="../login/login.html">
+
+<dom-module id="status-container">
+    <template>
+        <style>
+            :host {
+                padding: 0px 20px 20px 20px;
+                display: block;
+            }
+            tr {
+                margin-bottom: 15px;
+                display: block;
+            }
+            td {
+                display: inline-block;
+                vertical-align: top;
+            }
+            basic-login {
+                position: absolute;
+                top: 40%; 
+                left: 50%;
+                transform: translate(-50%,-50%);
+                transition: opacity .3s ease-out;
+            }
+        </style>
+        <notification-border></notification-border>
+        <container-header></container-header>
+        <basic-login id="login" username="{{username}}" password="{{password}}"></basic-login>        
+        <table>
+            <template is="dom-repeat" items="{{statusProperties.statuses}}">
+                <tr>
+                    <template is="dom-repeat" items="{{item.children}}">
+                        <td>
+                            <status-group properties="{{item}}" horiz-size="4" padding="4"></status-group> 
+                        </td>
+                    </template>    
+                </tr>
+            </template>    
+        </table>
+        <iron-ajax
+            id="getInitialStatuses"
+            url="/status"
+            handle-as="json"
+            with-credentials="true"
+            last-response="{{statusProperties}}"
+            on-response="_handleResponse"
+            on-error="_handleError"></iron-ajax>
+    </template>
+    <script>
+        class StatusContainer extends Polymer.Element {
+            static get is() {
+                return "status-container";
+            }
+            static get properties() {
+                return {
+                    statusProperties: {
+                        type: Object,
+                        value: {
+                            statuses: [],
+                        },
+                    },
+                    username: {
+                        type: String,
+                        value: ""
+                    },
+                    password: {
+                        type: String,
+                        value: ""
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.$.login.addEventListener('loggedIn', this.start.bind(this))
+            }
+            start() {
+                this.$.login.style.opacity = "0";
+                setTimeout(function(){
+                    this.$.login.style.display = "none";
+                    this.$.getInitialStatuses.headers['Authorization'] = this.makeAuthHeaders(this.username, this.password);
+                    this.$.getInitialStatuses.generateRequest();
+                }.bind(this), 300);
+            }
+            makeAuthHeaders(username, password) { 
+                return "Basic " + btoa(username + ":" + password); 
+            }
+            _toArray(obj) {
+                return Object.keys(obj).map(function(key) {
+                    return {
+                        key: key,
+                        value: obj[key]
+                    };
+                });
+            }
+
+            _handleResponse(e){
+                console.log("Got intial statues!");
+                this.startWS();                
+            }
+            _handleError(e){
+                console.log("Failed request for intial status :( Will try again in some time.");
+                setTimeout(function(){
+                    this.$.getInitialStatuses.generateRequest();
+                }.bind(this), 5000);
+            }
+
+            startWS() {
+                let host = window.location.hostname;
+                let port = window.location.port
+                var wsProtocol
+                if(host == "localhost") {
+                    wsProtocol = "ws"
+                } else {
+                    wsProtocol = "wss"
+                }
+                this.ws = new WebSocket(wsProtocol + "://" + this.username + ":" + this.password + "@" + host + ":" + port + "/live");
+                this.ws.onopen = function(){
+                    window.dispatchEvent(new CustomEvent('notificationState', {"detail":{state: "off"}}));                                        
+                    console.log("ws is connected");
+                }.bind(this);
+                this.ws.onclose = function(){
+                    window.dispatchEvent(new CustomEvent('notificationState', {"detail":{state: "bad", message:"Websocket disconnected! Attempting to reconnect ..."}}));                    
+                    console.log("ws is disconnected");
+                    this.$.getInitialStatuses.generateRequest();
+                }.bind(this);
+                this.ws.onerror = function(error){
+                    console.log(error);
+                }
+                this.ws.onmessage = this._onMessage.bind(this);
+                               
+            }
+
+            _onMessage(msg) {
+                let s = JSON.parse(msg.data);                
+                this._updateStatus(s.id, s.status); 
+                console.log("Updated " + s.id + " to " + s.status);
+            }
+
+            /**
+             * updateStatus updates the status status based on given id 
+             * @param {string} id Ex "pop#env#serviceName" where the id of the objects of "#" delimited
+             * @param {string} status Status of the object
+             */
+            _updateStatus(id, status){
+                var statusPath = 'statusProperties.statuses.'
+                let arrayIndex = this._findStatusIDPath(id, this.statusProperties.statuses)
+                if(arrayIndex.error != ""){
+                    console.log("Update error: " + arrayIndex.error)
+                }
+                this.set(statusPath + arrayIndex.path + ".status", status)
+            }
+
+            /**
+             * findStatusIDPath returns a string with the index of the all the object leading to the status object. For Polymer, we need the array index of these obejcts
+             * @param {array} statusArray Array of statuses stored in this.statusProperties
+             * @return {{
+             *   path: string <path of indexes to the status object which are "." delimited. ex: "3.5.4">
+             *   error: string <string of any errors>
+             */
+            _findStatusIDPath(id, statusArray) {
+                let ids = this._getFirstId(id)
+                let index = statusArray.findIndex(x => x.id == ids.first)
+                if(index == -1) {
+                    return {
+                        path: index,
+                        error: "Could not find id: " + ids.first
+                    }
+                }
+                // if there are more ids, keep going!
+                if(ids.rest != "") {
+                    let result = this._findStatusIDPath(ids.rest, statusArray[index].children)
+                    if(result.error != "") {
+                        return result
+                    }
+                    return {
+                        path: index + ".children." + result.path,
+                        error: ""
+                    }
+                }
+                return {
+                    path: index,
+                    error: ""
+                }
+            }
+
+            /**
+             * getFirstId returns first id and remaining ids
+             * @param {string} id Ex "pop-env-serviceName" where the id of the objects of "#" delimited
+             * @return {{
+             *   first: string <first id>
+             *   rest: string <rest of string without first id>
+             */
+            _getFirstId(id) {
+                let ids = id.split("#")
+                let rest = ids.slice(1).join("#");
+                return {
+                    first: ids[0], 
+                    rest: rest
+                }
+            }
+        }
+        customElements.define(StatusContainer.is, StatusContainer)
+    </script>
+</dom-module>

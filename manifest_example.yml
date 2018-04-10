@@ -1,0 +1,7 @@
+applications:
+- name: services-monitor
+  random-route: true
+  buildpack: https://github.com/cloudfoundry/go-buildpack.git
+  memory: 256M
+  env:
+     GOPACKAGENAME: goapp

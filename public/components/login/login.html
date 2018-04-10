@@ -1,0 +1,139 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/px-forms-design/css/px-forms-design-demo-styles.html"/>
+<link rel="import" href="../../bower_components/px-icon-set/px-icon-set.html"/>
+
+
+<dom-module id="basic-login">
+    <template>
+        <style include="px-forms-design-demo-styles">
+            :host{
+            }
+            #containter {
+                width: 100%;
+                align-content: center;
+            }
+            #username, #password {
+                color: white;                
+            }
+            #username:focus, #password:focus, #username:hover, #password:hover {
+                background-color: #364c5825;               
+            }
+            .heading {
+                display: flex;
+                justify-content: space-between;
+                font-size: 20px;
+                color: white;
+                margin-bottom: 20px;
+            }
+            .footer {
+                display: flex;
+                justify-content: space-between;
+                color: grey;
+                margin-top: 20px;
+            }
+            #form {
+                width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+                border: 1px solid grey;
+                padding: 20px;
+            }
+            .field {
+                margin: 10px 0px;
+            }
+            .field-button {
+                display: flex;
+                justify-content: flex-end;
+                padding-top: 10px;
+            }
+            #authError {
+                color: salmon;
+                text-align: center;
+                font-size: 14px;
+                display: none;
+            }
+        </style>
+        <div id="containter">
+            <div id="form">
+                <div class="heading">Dashboard Login</div>
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input class="text-input" id="username" type="text" value="admin">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input class="text-input" id="password" type="password">
+                </div>
+                <div id="authError">Invalid credentials</div>                
+                <div class="field-button">                
+                    <input id="login" class="btn btn--primary" type="submit" value="Login" on-click="loginHandler">
+                </div>
+                <div class="footer">
+                    <px-icon icon="px-obj:airplane"></px-icon>
+                    <px-icon icon="px-obj:hrsg"></px-icon>
+                    <px-icon icon="px-obj:airplane-engine"></px-icon>
+                    <px-icon icon="px-obj:wind-turbine"></px-icon>
+                    <px-icon icon="px-obj:manufacturing-line"></px-icon>
+                    <px-icon icon="px-fea:deployments"></px-icon>
+                </div>
+            </div>
+        </div>
+        <iron-ajax
+            id="testAuth"
+            url="/login"
+            with-credentials="true"
+            handle-as="text"
+            on-response="_onAuthResponse"
+            on-error="_onAuthError"></iron-ajax>
+    </template>
+    <script>
+        class BasicLogin extends Polymer.Element {
+            static get is() {
+                return "basic-login";
+            }
+            static get properties() {
+                return {
+                    username: {
+                        type: String,
+                        value: "admin",
+                        notify: true
+                    },
+                    password: {
+                        type: String,
+                        value: "",
+                        notify: true
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.$.form.onkeypress = function(e) {
+                    var key = e.charCode || e.keyCode || 0;     
+                    if (key == 13) {
+                        e.preventDefault();
+                        this.loginHandler();
+                    }
+                }.bind(this);
+            }
+            loginHandler() {
+                this.$.testAuth.headers['Authorization'] = this.makeAuthHeaders(this.$.username.value, this.$.password.value);
+                this.$.testAuth.generateRequest();
+            }
+            makeAuthHeaders(username, password) { 
+                return "Basic " + btoa(username + ":" + password); 
+            }
+            _onAuthResponse(e) {
+                this.username = this.$.username.value;
+                this.password = this.$.password.value;
+                this.dispatchEvent(new CustomEvent('loggedIn', {}));
+            }
+            _onAuthError(e) {
+                this.$.authError.style.display = "block";
+            }
+        }
+        customElements.define(BasicLogin.is, BasicLogin)
+    </script>
+</dom-module>

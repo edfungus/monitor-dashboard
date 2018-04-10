@@ -1,0 +1,150 @@
+{
+	"dashboardName": "Example Dashboard",
+	"probes": [{
+		"id": "NewRelic-12345",
+		"type": "NewRelic",
+		"data": {
+			"accountNumber": "12345",
+			"interval": "1m",
+			"apiKeyEnvVar": "NEW_RELIC_12345_KEY"
+		}
+	}],
+	"statuses": [{
+		"id": "env",
+		"fullName": "Environments",
+		"abbrevName": "EV",
+		"children": [{
+			"id": "prod",
+			"fullName": "Production",
+			"abbrevName": "PR",
+			"children": [{
+				"id": "service1",
+				"fullName": "Cool Service",
+				"abbrevName": "S1",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-pr-1"
+					}
+				}
+			}, {
+				"id": "service2",
+				"fullName": "Cool Service",
+				"abbrevName": "S2",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-pr-2"
+					}
+				}
+			}, {
+				"id": "service3",
+				"fullName": "Cool Service",
+				"abbrevName": "S3",
+				"children": [],
+				"status": "degraded",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-pr-3"
+					}
+				}
+			}]
+		}, {
+			"id": "dev",
+			"fullName": "Dev",
+			"abbrevName": "DV",
+			"children": [{
+				"id": "service1",
+				"fullName": "Cool Service",
+				"abbrevName": "S1",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-1"
+					}
+				}
+			}, {
+				"id": "service2",
+				"fullName": "Cool Service",
+				"abbrevName": "S2",
+				"children": [],
+				"status": "bad",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-2"
+					}
+				}
+			}, {
+				"id": "service3",
+				"fullName": "Cool Service",
+				"abbrevName": "S3",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-3"
+					}
+				}
+			}]
+		}, {
+			"id": "nightly",
+			"fullName": "Nightly Tests",
+			"abbrevName": "NN",
+			"children": [{
+				"id": "service1",
+				"fullName": "Cool Service",
+				"abbrevName": "S1",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-1"
+					}
+				}
+			}, {
+				"id": "service2",
+				"fullName": "Cool Service",
+				"abbrevName": "S2",
+				"children": [],
+				"status": "unknown",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-2"
+					}
+				}
+			}, {
+				"id": "service3",
+				"fullName": "Cool Service",
+				"abbrevName": "S3",
+				"children": [],
+				"status": "good",
+				"url": "https://some-cool-service.com",
+				"probe": {
+					"probeRefId": "NewRelic-12345",
+					"data": {
+						"monitorName": "cool-service-dev-3"
+					}
+				}
+			}]
+		}]
+	}]
+}

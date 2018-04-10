@@ -1,0 +1,100 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="status-box">
+    <template>
+        <style>
+            :host{
+                display: inline;
+                float: left;
+            }
+            #box {
+                cursor: pointer;
+            }
+            .square {
+                box-sizing: border-box;   
+                position: relative;
+                color: #ffffff;                
+                background-color: #50595C;  
+                border: 3px rgba(255, 255, 255, 0.2) solid;   
+            }
+            .text {
+                position: absolute;
+                line-height: 60%;
+            }
+            #abbrev-text {
+                text-transform: uppercase;
+            }
+            #sub-text {
+                text-transform: lowercase;
+                font-size: 12px;
+                opacity: .7;
+            }
+            .good {
+                color: #ffffff;;
+                background-color: #CBF078;
+            }
+            .degraded {
+                color: #ffffff;
+                background-color: #F1B963;
+            }
+            .bad {
+                color: #ffffff;
+                background-color: #E46161;
+            }
+            .unknown {
+                color: #50595C;
+                background-color: ghostwhite;
+            }
+        </style>
+        <div id="box" class$="square {{properties.status}}" style$="width: {{size}}px; height: {{size}}px">
+            <div id="sub-text" class="text" style$="top: {{inset}}px; right: {{inset}}px;">{{properties.subText}}</div>                
+            <div id="abbrev-text" class="text" style$="bottom: {{inset}}px; right: {{inset}}px;">{{properties.abbrevName}}</div>
+        </div>
+    </template>
+    <script>
+        class StatusBox extends Polymer.Element {
+            static get is() {
+                return "status-box";
+            }
+            static get properties() {
+                return {
+                    properties: {
+                        /* 
+                        {
+                            "id":"",
+                            "fullName":"",
+                            "abbrevName":"",    
+                            "status":"",
+                            "children":{"id":status-group{}, ...},
+                            "url":""    
+                        }
+                        */
+                        type: Object,
+                        notify: true
+                    },
+                    size: {
+                        type: Number,
+                        value: 100
+                    },
+                    inset: {
+                        type: Number,
+                        computed: "computeInset(size)"
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.$.box.addEventListener('click', function() {
+                    window.open(this.properties.url, "_blank", "", false);
+                }.bind(this))
+            }
+            computeInset(size){
+                return size*.1;
+            }
+        }
+        customElements.define(StatusBox.is, StatusBox)
+    </script>
+</dom-module>

@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/px-icon-set/px-icon-set.html"/>
+
+<dom-module id="container-header">
+    <template>
+        <style>
+            :host {
+            }
+            #header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center; 
+                padding: 20px 8px 10px 8px;
+            }
+            .title {
+                font-size: 24px;
+            }
+            .controls px-icon {
+                --px-icon-default-width: 18px;
+                --px-icon-default-height: 18px;
+                margin-left: 8px;
+            }
+        </style>
+        <div id="header">
+            <div class="title v-middle">
+                <px-icon icon="px-fea:microservice"></px-icon>  {{.}}
+            </div>
+            <div class="controls v-middle">
+                <px-icon id="legendIcon" icon="px-utl:information"></px-icon></px-icon> 
+            </div>
+        </div>
+    </template>
+    <script>
+        class ContainerHeader extends Polymer.Element {
+            static get is() {
+                return "container-header";
+            }
+            static get properties() {
+                return {}
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+        }
+        customElements.define(ContainerHeader.is, ContainerHeader)
+    </script>
+</dom-module>

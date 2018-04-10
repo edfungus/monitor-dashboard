@@ -1,0 +1,90 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="notification-border">
+    <template>
+        <style>
+            :host{
+            }
+            #ring {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                box-sizing: border-box;
+            }
+            #ring.off {
+                border: none;
+            }
+            #ring.degraded {
+                border: #F1B963 15px solid;
+                animation: blinker 1s ease-out infinite;
+            }
+            #ring.bad {
+                border: #E46161 15px solid;
+                animation: blinker 1s ease-out infinite;
+            }
+            @keyframes blinker {  
+                50% { opacity: 0; }
+            }
+            #msg {
+                max-width: 500px;
+                padding: 20px;
+                bottom: 35px;
+                left: 0;
+                right: 0;
+                margin: auto;
+                text-align: center;
+                z-index: 1;
+            }
+            #msg.bad {
+                display: block;
+                position: absolute;
+                background-color: #E46161;             
+                color: ghostwhite;
+            }
+            #msg.off {
+                display: none;                
+            }
+        </style>
+        <div id=ring class$="{{state}}"></div>
+        <div id=msg class$="{{state}} {{showMsg}}"></div>
+    </template>
+    <script>
+        class NotificationBorder extends Polymer.Element {
+            static get is() {
+                return "notification-border"
+            }
+            static get properties() {
+                return {
+                    state: {
+                        type: String,
+                        notify: true,
+                        value: "off"
+                    },
+                    showMsg: {
+                        type: String,
+                        notify: true,
+                        value: "off"
+                    }
+                }
+            }
+            constructor() {
+                super();
+                window.addEventListener('notificationState', function(e){
+                    if(e.detail != null && e.detail.state != "") {
+                        this.state = e.detail.state;   
+                        if(e.detail.message != null && e.detail.message != ""){
+                            this.showMsg = "";
+                            this.$.msg.innerHTML = e.detail.message;                    
+                        }  
+                    }
+                }.bind(this));
+            }
+            ready() {
+                super.ready();
+            }
+        }
+        customElements.define(NotificationBorder.is, NotificationBorder)
+    </script>
+</dom-module>

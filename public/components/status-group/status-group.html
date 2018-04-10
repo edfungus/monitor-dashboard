@@ -1,0 +1,101 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../status-box/status-box.html">
+<dom-module id="status-group">
+    <template>
+        <style>
+            :host{
+                display: block;
+                float: left;
+            }
+            .header {
+                /* border-bottom: 1px ghostwhite solid; */
+                font-size: 20px;
+                display: block;
+            }
+        </style>
+        <div class="group" style$="width: {{width}}px; padding: {{padding}}px; padding-top: {{triplePadding}}px;">
+            <div class="header" style$="width: {{headerWidth}}px; margin-bottom: {{padding}}px; margin-left: {{halfPadding}}px;">{{properties.fullName}}</div>
+            <div class="boxes">
+                <template is="dom-repeat" items="{{properties.children}}">
+                    <status-box id$="{{item.id}}" properties="{{item}}" size="{{boxSize}}" style$="padding: {{halfPadding}}px;"></status-box>        
+                </template>
+            </div>
+        </div>
+    </template>
+    <script>
+        class StatusGroup extends Polymer.Element {
+            static get is() {
+                return "status-group"
+            }
+            static get properties() {
+                return {
+                    properties: {
+                        /* 
+                        {
+                            "id":"",
+                            "fullName":"",
+                            "abbrevName":"",    
+                            "status":"",
+                            "children":{"id":status-group{}, ...},
+                            "url":""    
+                        }
+                        */
+                        type: Object,
+                        value: {
+                            fullName: "???",
+                            children:{},
+                        },
+                    },
+                    horizSize: {
+                        type: Number,
+                        value: 5,
+                    },
+                    boxSize: {
+                        type: Number,
+                        value: 50,
+                    },
+                    padding: {
+                        type: Number,
+                        value: 2,
+                    },
+                    width: {
+                        type: Number,
+                        computed: "computeWidth(boxSize, horizSize, padding)",
+                    },
+                    headerWidth: {
+                        type: Number,
+                        computed: "computeHeaderWidth(width, padding)",
+                    },
+                    halfPadding: {
+                        type: Number,
+                        computed: "computerHalfPadding(padding)",
+                    },
+                    triplePadding: {
+                        type: Number,
+                        computed: "computerTriplePadding(padding)",
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+            }
+            computeWidth(boxSize, horizSize, padding) {
+                return boxSize * horizSize + (horizSize * padding)
+            }
+            computeHeaderWidth(width, padding) {
+                return width-padding;
+            }
+            computerHalfPadding(padding) {
+                return padding/2;
+            }
+            computerTriplePadding(padding) {
+                return padding * 3;
+            }
+        }
+        customElements.define(StatusGroup.is, StatusGroup)
+    </script>
+</dom-module>
